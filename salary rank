@@ -1,0 +1,26 @@
+WITH cte AS (
+SELECT 
+	e.BusinessEntityID, 
+	ed.DepartmentID, 
+	e.JobTitle, 
+	ROUND(((eph.rate*40*52)/12), 2) AS Salary
+FROM
+	HumanResources.Employee e
+JOIN
+	HumanResources.EmployeeDepartmentHistory ed ON e.businessEntityID = ed.BusinessEntityID
+JOIN
+	HumanResources.EmployeePayHistory eph ON eph.BusinessEntityID = e.BusinessEntityID
+)
+SELECT
+ BusinessEntityID,
+ DepartmentID,
+ JobTitle,
+ Salary
+FROM (
+SELECT 
+	*,
+	RANK() OVER(PARTITION BY departmentID ORDER BY Salary DESC) AS rnk
+FROM cte
+) x
+WHERE
+	rnk = 1
